@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>آمار بسته‌بندی</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- html2canvas for image export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <!-- Jalali converter -->
+    <script src="https://cdn.jsdelivr.net/npm/jalaali-js/dist/jalaali.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+@media print{
+
+    *{
+        font-family:'Vazirmatn',sans-serif !important;
+        direction:rtl !important;
+        unicode-bidi:embed !important;
+        letter-spacing:0 !important;
+        word-spacing:0 !important;
+        white-space:nowrap !important;
+    }
+
+}
+
+#captureArea{
+    direction:rtl;
+    unicode-bidi:embed;
+    font-family:'Vazirmatn',sans-serif;
+    isolation:isolate;
+}
+
+#captureArea table{
+    border-collapse:collapse;
+}
+
+#captureArea th,
+#captureArea td{
+    white-space:nowrap;
+    vertical-align:middle;
+}
+
+#captureArea input,
+#captureArea select{
+    font-family:'Vazirmatn',sans-serif;
+}
+</style>
+
+<style>
+    body{
+        font-family:'Vazirmatn',sans-serif;
+        background:#0f172a;
+        color:#f8fafc;
+        direction:rtl;
+        unicode-bidi:embed;
+        text-rendering:geometricPrecision;
+        -webkit-font-smoothing:antialiased;
+        letter-spacing:0 !important;
+        word-spacing:0 !important;
+    }
+
+    *{
+        font-family:'Vazirmatn',sans-serif !important;
+        direction:rtl;
+        unicode-bidi:embed;
+        letter-spacing:0 !important;
+        word-spacing:0 !important;
+        text-rendering:geometricPrecision;
+    }
+
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button{
+        -webkit-appearance:none;
+        margin:0;
+    }
+
+    input[type=number]{
+        -moz-appearance:textfield;
+    }
+
+    input,
+    select,
+    td,
+    th,
+    span,
+    div,
+    label,
+    h1,
+    h2,
+    h3{
+        -webkit-text-fill-color:currentColor;
+        white-space:nowrap;
+        letter-spacing:0 !important;
+        word-spacing:0 !important;
+    }
+
+    .capture-value{
+        display:inline-block;
+        min-width:40px;
+        text-align:center;
+        font-family:'Vazirmatn',sans-serif;
+    }
+</style>
+  
+</head>
+<body class="min-h-screen p-2 sm:p-6">
+    <div class="max-w-md mx-auto space-y-4">
+        
+        <!-- App Header & Date/Time (Shamsi) -->
+        <div class="bg-slate-900 rounded-2xl shadow-xl border border-slate-800 p-4 text-center">
+            <h1 class="text-xl font-bold text-cyan-400 mb-2">آمار بسته بندی</h1>
+            <div class="flex items-center justify-center gap-2 text-sm text-slate-300">
+                <span class="text-xs text-slate-400">تاریخ و زمان (شمسی):</span>
+                <input type="text" id="dateTimeInput" readonly
+                    class="bg-slate-800 border border-slate-600 rounded-lg px-3 py-1 text-cyan-300 text-xs font-mono text-center shadow-inner cursor-pointer" onclick="toggleEditDate()" title="کلیک برای ویرایش دستی">
+            </div>
+        </div>
+
+        <!-- Line Tabs Selector (خط ۱، خط ۲، خط ۳) -->
+        <div class="bg-slate-900 p-2 rounded-2xl border border-slate-800 shadow-xl flex gap-2">
+            <button onclick="switchLine(1)" id="tab_line_1" class="flex-1 py-2.5 rounded-xl font-bold text-xs transition shadow-md bg-cyan-600 text-white">خط ۱</button>
+            <button onclick="switchLine(2)" id="tab_line_2" class="flex-1 py-2.5 rounded-xl font-bold text-xs transition shadow-md bg-slate-800 text-slate-300 hover:bg-slate-700">خط ۲</button>
+            <button onclick="switchLine(3)" id="tab_line_3" class="flex-1 py-2.5 rounded-xl font-bold text-xs transition shadow-md bg-slate-800 text-slate-300 hover:bg-slate-700">خط ۳</button>
+        </div>
+
+        <!-- Capture Area for Export Image -->
+        <div id="captureArea" class="bg-slate-900 rounded-2xl shadow-2xl overflow-hidden border border-slate-800 p-4 space-y-5">
+            
+            <!-- Current Active Line Indicator -->
+            <div class="text-center bg-slate-800/90 py-2 px-3 rounded-xl border border-slate-700 text-amber-300 font-bold text-sm tracking-wide shadow-inner" id="activeLineTitle">
+                گزارش عملکرد: خط ۱
+            </div>
+
+            <!-- Tile Configuration Bar (Outside tables, right after line selector) -->
+            <div class="p-3 bg-slate-800/80 rounded-xl border border-slate-700/80 space-y-3 shadow-inner">
+                <div class="grid grid-cols-2 gap-2 text-xs">
+                    <div>
+                        <label class="block text-slate-400 mb-3">سایز کاشی:</label>
+                        <select id="tileSizeSelect" class="w-full bg-slate-900 border border-slate-600 rounded-lg p-2 text-slate-200 focus:outline-none focus:border-cyan-400 text-xs" onchange="onTileSizeChange()">
+                            <option value="60x120">۶۰ × ۱۲۰</option>
+                            <option value="60x60">۶۰ × ۶۰</option>
+                            <option value="80x80">۸۰ × ۸۰</option>
+                            <option value="40x120">۴۰ × ۱۲۰</option>
+                            <option value="100x100">۱۰۰ × ۱۰۰</option>
+                            <option value="custom">سایر (ورودی دستی)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-slate-400 mb-3">تعداد برگ در کارتن:</label>
+                        <input type="number" id="leavesInput" value="3" min="1" 
+                            class="w-full bg-slate-900 border border-slate-600 rounded-lg p-2 text-center text-slate-200 font-mono text-xs focus:outline-none focus:border-cyan-400"
+                            oninput="onConfigInput()">
+                    </div>
+                </div>
+                <!-- Custom Size Manual Input Row -->
+                <div id="customSizeContainer" class="hidden pt-1 border-t border-slate-700/60 grid grid-cols-2 gap-2 text-xs">
+                    <div>
+                        <label class="block text-slate-400 mb-1">طول (سانتی‌متر):</label>
+                        <input type="number" id="customLength" value="120" class="w-full bg-slate-900 border border-slate-600 rounded-lg p-1.5 text-center text-slate-200 font-mono text-xs" oninput="onConfigInput()">
+                    </div>
+                    <div>
+                        <label class="block text-slate-400 mb-1">عرض (سانتی‌متر):</label>
+                        <input type="number" id="customWidth" value="60" class="w-full bg-slate-900 border border-slate-600 rounded-lg p-1.5 text-center text-slate-200 font-mono text-xs" oninput="onConfigInput()">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Shifts Container (A, B, C) -->
+            <div id="shiftsContainer" class="space-y-4">
+                <!-- Dynamically generated via JS -->
+            </div>
+
+            <!-- Total Grand Summary Table (Without Title Column, includes Grade 6 leaves total) -->
+            <div class="bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl p-3 border border-slate-700/80 shadow-lg">
+                <div class="text-center font-bold text-emerald-400 mb-2 text-sm tracking-wide">آمار کل مجموع ۳ شیفت</div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-center text-xs">
+                        <thead>
+                            <tr class="border-b border-slate-700 text-slate-400">
+                                <th class="py-1.5 px-1">مجموع کارتن</th>
+                                <th class="py-1.5 px-1">مجموع متراژ (متر)</th>
+                                <th class="py-1.5 px-1">تعداد برگ درجه ۶</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="font-bold text-slate-100">
+                                <td id="grandTotalCartons" class="py-2 px-1 font-mono text-sm text-amber-300">0</td>
+                                <td id="grandTotalMeters" class="py-2 px-1 font-mono text-sm text-emerald-300">0.00</td>
+                                <td id="grandTotalGrade6" class="py-2 px-1 font-mono text-sm text-rose-300">0</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Action Buttons (Outside capture area) -->
+        <div class="flex gap-3 px-1">
+            <button onclick="exportImage()" class="flex-1 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-semibold py-3 px-4 rounded-xl shadow-lg transition transform active:scale-95 flex items-center justify-center gap-2 text-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                خروجی عکس
+            </button>
+            <button onclick="confirmReset()" class="flex-1 bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 text-white font-semibold py-3 px-4 rounded-xl shadow-lg transition transform active:scale-95 flex items-center justify-center gap-2 text-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+                پاک کردن داده‌ها
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+        const shifts = [
+            { id: 'A', name: 'شیفت A', color: 'from-purple-700 to-purple-900', borderColor: 'border-purple-600' },
+            { id: 'B', name: 'شیفت B', color: 'from-blue-700 to-blue-900', borderColor: 'border-blue-600' },
+            { id: 'C', name: 'شیفت C', color: 'from-emerald-700 to-emerald-900', borderColor: 'border-emerald-600' }
+        ];
+
+        const grades = [1, 2, 4, 5];
+        let currentLine = 1;
+        let allData = {};
+
+        function initApp() {
+            loadAllData();
+            initDateTime();
+            renderShifts();
+            loadLineData(currentLine);
+            calculateAll();
+
+            document.getElementById('captureArea').addEventListener('input', () => {
+                saveLineData(currentLine);
+                calculateAll();
+            });
+        }
+
+        function initDateTime() {
+            const dtInput = document.getElementById('dateTimeInput');
+            if (!dtInput.value || dtInput.dataset.manual !== 'true') {
+                const now = new Date();
+                const jDate = jalaali.toJalaali(now);
+                const jy = jDate.jy;
+                const jm = String(jDate.jm).padStart(2, '0');
+                const jd = String(jDate.jd).padStart(2, '0');
+                const hours = String(now.getHours()).padStart(2, '0');
+                const mins = String(now.getMinutes()).padStart(2, '0');
+                dtInput.value = `${jy}/${jm}/${jd} - ${hours}:${mins}`;
+            }
+        }
+
+        function toggleEditDate() {
+            const dtInput = document.getElementById('dateTimeInput');
+            const newVal = prompt('ویرایش تاریخ و زمان:', dtInput.value);
+            if (newVal !== null) {
+                dtInput.value = newVal;
+                dtInput.dataset.manual = 'true';
+                saveAllData();
+            }
+        }
+
+        function switchLine(lineNum) {
+            saveLineData(currentLine);
+            currentLine = lineNum;
+
+            for (let i = 1; i <= 3; i++) {
+                const btn = document.getElementById(`tab_line_${i}`);
+                if (i === lineNum) {
+                    btn.className = "flex-1 py-2.5 rounded-xl font-bold text-xs transition shadow-md bg-cyan-600 text-white";
+                } else {
+                    btn.className = "flex-1 py-2.5 rounded-xl font-bold text-xs transition shadow-md bg-slate-800 text-slate-300 hover:bg-slate-700";
+                }
+            }
+
+            document.getElementById('activeLineTitle').innerText = `گزارش عملکرد: خط ${lineNum}`;
+            loadLineData(lineNum);
+            calculateAll();
+        }
+
+        function renderShifts() {
+            const container = document.getElementById('shiftsContainer');
+            container.innerHTML = '';
+
+            shifts.forEach(shift => {
+                let html = `
+                    <div class="bg-slate-800/90 rounded-xl overflow-hidden border ${shift.borderColor} shadow-lg">
+                        <!-- Shift Header -->
+                        <div class="bg-gradient-to-r ${shift.color} py-2.5 px-3 text-center font-bold text-white text-sm tracking-wider shadow-md">
+                            ${shift.name}
+                        </div>
+
+                        <!-- Table -->
+                        <div class="overflow-x-auto p-2">
+                            <table class="w-full text-center text-xs">
+                                <thead>
+                                    <tr class="border-b border-slate-700 text-slate-400">
+                                        <th class="py-1.5 px-1 font-medium">درجه</th>
+                                        <th class="py-1.5 px-1 font-medium">کارتن</th>
+                                        <th class="py-1.5 px-1 font-medium">متر</th>
+                                        <th class="py-1.5 px-1 font-medium">درصد</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-800">
+                `;
+
+                // Grades 1, 2, 4, 5
+                grades.forEach(grade => {
+                    html += `
+                        <tr class="hover:bg-slate-700/30 transition">
+                            <td class="py-2 px-1 font-bold text-slate-300">${grade}</td>
+                            <td class="py-2 px-1">
+                                <input type="number" inputmode="numeric" id="carton_${shift.id}_${grade}" value="" placeholder="0"
+                                    class="w-full bg-slate-900 border border-slate-700 rounded-lg py-1.5 px-1 text-center font-mono text-slate-100 text-xs focus:outline-none focus:border-cyan-400 shadow-inner">
+                            </td>
+                            <td class="py-2 px-1">
+                                <input type="number" step="0.01" inputmode="decimal" id="meter_${shift.id}_${grade}" value="" placeholder="0.00"
+                                    class="w-full bg-slate-900 border border-slate-700 rounded-lg py-1.5 px-1 text-center font-mono text-emerald-300 text-xs focus:outline-none focus:border-cyan-400 shadow-inner" readonly>
+                            </td>
+                            <td class="py-2 px-1">
+                                <input type="text" id="percent_${shift.id}_${grade}" value="0.0" 
+                                    class="w-full bg-slate-900/50 border border-slate-800 rounded-lg py-1.5 px-1 text-center font-mono text-cyan-300 text-xs font-semibold" readonly>
+                            </td>
+                        </tr>
+                    `;
+                });
+
+                // Grade 6 (Manual pieces, row 'برگ' inside table removed)
+                html += `
+                        <tr class="hover:bg-slate-700/30 transition border-t border-slate-700/60 bg-slate-900/30">
+                            <td class="py-2 px-1 font-bold text-rose-400">۶</td>
+                            <td colspan="3" class="py-2 px-1">
+                                <div class="flex items-center justify-center gap-2">
+                                    <span class="text-slate-400 text-[11px]">تعداد برگ:</span>
+                                    <input type="number" inputmode="numeric" id="manual_grade6_${shift.id}" value="" placeholder="0"
+                                        class="w-24 bg-slate-900 border border-slate-700 rounded-lg py-1 px-2 text-center font-mono text-rose-300 text-xs focus:outline-none focus:border-cyan-400 shadow-inner">
+                                </div>
+                            </td>
+                        </tr>
+                `;
+
+                // Shift Footer (Sum row only)
+                html += `
+                                </tbody>
+                                <tfoot>
+                                    <tr class="border-t border-slate-700 bg-slate-900/80 font-bold text-cyan-400">
+                                        <td class="py-2 px-1">جمع</td>
+                                        <td id="sum_carton_${shift.id}" class="py-2 px-1 font-mono text-amber-300">0</td>
+                                        <td id="sum_meter_${shift.id}" class="py-2 px-1 font-mono text-emerald-400">0.00</td>
+                                        <td id="sum_percent_${shift.id}" class="py-2 px-1 font-mono text-cyan-300">100</td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += html;
+            });
+        }
+
+        function onTileSizeChange() {
+            const select = document.getElementById('tileSizeSelect');
+            const customContainer = document.getElementById('customSizeContainer');
+            const leavesInput = document.getElementById('leavesInput');
+            const val = select.value;
+
+            if (val === 'custom') {
+                customContainer.classList.remove('hidden');
+            } else {
+                customContainer.classList.add('hidden');
+                if (val === '60x120') leavesInput.value = 3;
+                else if (val === '60x60') leavesInput.value = 4;
+                else if (val === '80x80') leavesInput.value = 3;
+                else if (val === '40x120') leavesInput.value = 4;
+                else if (val === '100x100') leavesInput.value = 2;
+            }
+
+            saveLineData(currentLine);
+            calculateAll();
+        }
+
+        function onConfigInput() {
+            saveLineData(currentLine);
+            calculateAll();
+        }
+
+        function calculateAll() {
+            const sizeSelect = document.getElementById('tileSizeSelect').value;
+            const leaves = parseFloat(document.getElementById('leavesInput').value) || 0;
+            
+            let sqmPerLeaf = 0.72;
+            if (sizeSelect === '60x60') sqmPerLeaf = 0.36;
+            else if (sizeSelect === '80x80') sqmPerLeaf = 0.64;
+            else if (sizeSelect === '40x120') sqmPerLeaf = 0.48;
+            else if (sizeSelect === '100x100') sqmPerLeaf = 1.0;
+            else if (sizeSelect === 'custom') {
+                const l = parseFloat(document.getElementById('customLength').value) || 120;
+                const w = parseFloat(document.getElementById('customWidth').value) || 60;
+                sqmPerLeaf = (l / 100) * (w / 100);
+            }
+
+            const meterPerCarton = leaves * sqmPerLeaf;
+
+            shifts.forEach(shift => {
+                let sumCartons = 0;
+                let sumMeters = 0;
+                let shiftCartonsMap = {};
+
+                grades.forEach(grade => {
+                    const cartonInput = document.getElementById(`carton_${shift.id}_${grade}`);
+                    const meterInput = document.getElementById(`meter_${shift.id}_${grade}`);
+                    
+                    const cartons = parseFloat(cartonInput.value) || 0;
+                    const meters = cartons * meterPerCarton;
+                    
+                    meterInput.value = meters > 0 ? meters.toFixed(2) : '';
+                    
+                    shiftCartonsMap[grade] = cartons;
+                    sumCartons += cartons;
+                    sumMeters += meters;
+                });
+
+                document.getElementById(`sum_carton_${shift.id}`).innerText = sumCartons;
+                document.getElementById(`sum_meter_${shift.id}`).innerText = sumMeters.toFixed(2);
+
+                grades.forEach(grade => {
+                    const pctInput = document.getElementById(`percent_${shift.id}_${grade}`);
+                    const cartons = shiftCartonsMap[grade];
+                    let pct = 0;
+                    if (sumCartons > 0) {
+                        pct = (cartons / sumCartons) * 100;
+                    }
+                    pctInput.value = pct.toFixed(1);
+                });
+
+                document.getElementById(`sum_percent_${shift.id}`).innerText = sumCartons > 0 ? '100%' : '0%';
+            });
+
+            // Calculate Grand Total across all 3 shifts for current line
+            let grandCartons = 0;
+            let grandMeters = 0;
+            let grandGrade6 = 0;
+
+            shifts.forEach(shift => {
+                const sCarton = parseFloat(document.getElementById(`sum_carton_${shift.id}`).innerText) || 0;
+                const sMeter = parseFloat(document.getElementById(`sum_meter_${shift.id}`).innerText) || 0;
+                const g6 = parseFloat(document.getElementById(`manual_grade6_${shift.id}`).value) || 0;
+                
+                grandCartons += sCarton;
+                grandMeters += sMeter;
+                grandGrade6 += g6;
+            });
+
+            document.getElementById('grandTotalCartons').innerText = grandCartons;
+            document.getElementById('grandTotalMeters').innerText = grandMeters.toFixed(2);
+            document.getElementById('grandTotalGrade6').innerText = grandGrade6;
+        }
+
+        function saveLineData(lineNum) {
+            if (!allData[lineNum]) allData[lineNum] = {};
+
+            allData[lineNum].tileSize = document.getElementById('tileSizeSelect').value;
+            allData[lineNum].leaves = document.getElementById('leavesInput').value;
+            allData[lineNum].customLength = document.getElementById('customLength').value;
+            allData[lineNum].customWidth = document.getElementById('customWidth').value;
+
+            allData[lineNum].shifts = {};
+            shifts.forEach(shift => {
+                allData[lineNum].shifts[shift.id] = {
+                    cartons: {},
+                    grade6: document.getElementById(`manual_grade6_${shift.id}`).value
+                };
+                grades.forEach(grade => {
+                    allData[lineNum].shifts[shift.id].cartons[grade] = document.getElementById(`carton_${shift.id}_${grade}`).value;
+                });
+            });
+
+            saveAllData();
+        }
+
+        function loadLineData(lineNum) {
+            const data = allData[lineNum] || {};
+            
+            const tileSize = data.tileSize || '60x120';
+            document.getElementById('tileSizeSelect').value = tileSize;
+            document.getElementById('leavesInput').value = data.leaves || '3';
+            document.getElementById('customLength').value = data.customLength || '120';
+            document.getElementById('customWidth').value = data.customWidth || '60';
+
+            const customContainer = document.getElementById('customSizeContainer');
+            if (tileSize === 'custom') {
+                customContainer.classList.remove('hidden');
+            } else {
+                customContainer.classList.add('hidden');
+            }
+
+            shifts.forEach(shift => {
+                const sData = (data.shifts && data.shifts[shift.id]) ? data.shifts[shift.id] : {};
+                document.getElementById(`manual_grade6_${shift.id}`).value = sData.grade6 || '';
+                
+                grades.forEach(grade => {
+                    const val = (sData.cartons && sData.cartons[grade] !== undefined) ? sData.cartons[grade] : '';
+                    document.getElementById(`carton_${shift.id}_${grade}`).value = val;
+                });
+            });
+        }
+
+        function saveAllData() {
+            const storageObj = {
+                dateTime: document.getElementById('dateTimeInput').value,
+                isManualDate: document.getElementById('dateTimeInput').dataset.manual || 'false',
+                currentLine: currentLine,
+                linesData: allData
+            };
+            localStorage.setItem('packaging_multiline_data', JSON.stringify(storageObj));
+        }
+
+        function loadAllData() {
+            const saved = localStorage.getItem('packaging_multiline_data');
+            if (!saved) return;
+
+            try {
+                const parsed = JSON.parse(saved);
+                if (parsed.dateTime) {
+                    const dtInput = document.getElementById('dateTimeInput');
+                    dtInput.value = parsed.dateTime;
+                    dtInput.dataset.manual = parsed.isManualDate;
+                }
+                if (parsed.linesData) {
+                    allData = parsed.linesData;
+                }
+                if (parsed.currentLine) {
+                    currentLine = parsed.currentLine;
+                }
+            } catch (e) {
+                console.error('Error loading data', e);
+            }
+        }
+
+        function confirmReset() {
+            if (confirm(`آیا از پاک کردن تمام داده‌ها و تنظیمات خط ${currentLine} اطمینان دارید؟`)) {
+                if (allData[currentLine]) {
+                    delete allData[currentLine];
+                }
+                saveAllData();
+                loadLineData(currentLine);
+                calculateAll();
+                alert(`داده‌های خط ${currentLine} با موفقیت پاک شدند.`);
+            }
+        }
+
+function prepareCapture(element){
+
+    const replaced=[];
+
+    element.querySelectorAll("input,select").forEach(el=>{
+
+        const span=document.createElement("span");
+
+        span.className="capture-value";
+
+span.style.display="flex";
+span.style.alignItems="center";
+span.style.paddingTop="2px";
+span.style.justifyContent="center";
+span.style.textAlign="center";
+span.style.verticalAlign="middle";
+span.style.boxSizing="border-box";
+if(el.id && (el.id.includes("_1") || el.id.includes("grade1"))){
+    const ref=document.querySelector('[id="'+el.id.replace("_1","_2")+'"]');
+    if(ref){
+        span.style.width=ref.offsetWidth+"px";
+    }else{
+        span.style.width=el.offsetWidth+"px";
+    }
+}else{
+    span.style.width=el.offsetWidth+"px";
+}
+
+
+span.style.height=el.offsetHeight+"px";
+span.style.lineHeight=el.offsetHeight+"px";
+span.style.padding="0";
+span.style.margin="0";
+        span.style.background=getComputedStyle(el).backgroundColor;
+        span.style.border=getComputedStyle(el).border;
+        span.style.borderRadius=getComputedStyle(el).borderRadius;
+        span.style.color=getComputedStyle(el).color;
+        span.style.font=getComputedStyle(el).font;
+        span.style.fontWeight=getComputedStyle(el).fontWeight;
+        span.style.fontSize=getComputedStyle(el).fontSize;
+        span.style.direction="rtl";
+        span.style.whiteSpace="nowrap";
+        span.style.position="relative";
+span.style.top="0";
+span.style.left="0";
+span.style.transform="translateY(-2px)";
+span.style.overflow="hidden";
+
+        if(el.tagName==="SELECT"){
+            span.textContent=el.options[el.selectedIndex].text;
+        }else{
+            span.textContent=el.value || el.placeholder || "0";
+            if(el.id==="dateTimeInput"){
+    span.style.minWidth="180px";
+    span.style.fontWeight="700";
+    span.style.color="#67e8f9";
+}
+        }
+
+        replaced.push({
+            original:el,
+            clone:span
+        });
+
+        el.style.display="none";
+        el.parentNode.insertBefore(span,el);
+
+    });
+
+    return replaced;
+
+}
+
+function restoreCapture(list){
+
+    list.forEach(item=>{
+
+        item.clone.remove();
+        item.original.style.display="";
+
+    });
+
+}
+
+function exportImage(){
+
+    const element=document.getElementById("captureArea");
+
+    const replaced=prepareCapture(element);
+
+    html2canvas(element,{
+        scale:3,
+        useCORS:true,
+        allowTaint:true,
+        backgroundColor:"#0f172a",
+        logging:false,
+        foreignObjectRendering:false,
+        removeContainer:true,
+        imageTimeout:0,
+        onclone:function(doc){
+
+            doc.body.style.direction="rtl";
+
+            doc.querySelectorAll("*").forEach(function(el){
+
+                el.style.fontFamily="Vazirmatn,sans-serif";
+                el.style.direction="rtl";
+                el.style.unicodeBidi="embed";
+                el.style.letterSpacing="0";
+                el.style.wordSpacing="0";
+                el.style.textShadow="none";
+                el.style.whiteSpace="nowrap";
+
+            });
+
+        }
+
+    }).then(function(canvas){
+
+        restoreCapture(replaced);
+
+        const link=document.createElement("a");
+
+        link.download="packaging_line_"+currentLine+".png";
+
+        link.href=canvas.toDataURL("image/png");
+
+        link.click();
+
+    }).catch(function(err){
+
+        restoreCapture(replaced);
+
+        console.error(err);
+
+        alert("خطا در ایجاد تصویر");
+
+    });
+
+}
+
+        window.onload = initApp;
+    </script>
+</body>
+</html>
+
+
