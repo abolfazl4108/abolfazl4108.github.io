@@ -1,0 +1,1233 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>آمار قوس کاشی</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js">
+    </script>
+    <style>
+        /* تمام استایل‌های شما بدون تغییر */
+        :root {
+            --primary-color: #1e3a8a;
+            --secondary-color: #3b82f6;
+            --bg-color: #f8fafc;
+            --border-color: #cbd5e1;
+            --header-bg: #e2e8f0;
+            --soft-blue: #e0f2fe;
+            --soft-green: #dcfce7;
+            --light-purple: #f3e8ff;
+            --gold-color: #d97706;
+        }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Tahoma, Arial, sans-serif;
+        }
+        body {
+            background-color: var(--bg-color);
+            color: #1e293b;
+            padding: 10px;
+            padding-bottom: 240px;
+        }
+        .header-row {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            background: white;
+            padding: 8px 12px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            border: 2px solid var(--primary-color);
+            gap: 8px;
+        }
+        .header-row h1 {
+            margin: 0;
+            font-size: 1.3rem;
+            flex: 1;
+            text-align: center;
+            color: var(--primary-color);
+        }
+        .month-picker {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: #f1f5f9;
+            padding: 4px 10px;
+            border-radius: 30px;
+            font-weight: bold;
+            color: #0f172a;
+            border: 1px solid #cbd5e1;
+            flex-wrap: wrap;
+        }
+        .month-picker label {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.9rem;
+        }
+        .month-picker select {
+            background: white;
+            border: 1px solid #94a3b8;
+            border-radius: 20px;
+            padding: 4px 8px;
+            font-weight: bold;
+            color: #0f172a;
+            font-size: 0.9rem;
+            outline: none;
+            cursor: pointer;
+            font-family: Tahoma, Arial, sans-serif;
+        }
+        .month-picker select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px #bfdbfe;
+        }
+        .month-picker select option {
+            font-family: Tahoma, Arial, sans-serif;
+        }
+        .tabs {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .tab-btn {
+            padding: 10px 25px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+            background-color: #e2e8f0;
+            color: #475569;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        .tab-btn.active {
+            background-color: var(--primary-color);
+            color: white;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .table-section {
+            background: white;
+            padding: 12px;
+            border-radius: 14px;
+            border: 3px solid var(--primary-color);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            position: relative;
+        }
+        .table-responsive {
+            border: 3px solid var(--gold-color);
+            border-radius: 8px;
+            overflow-x: auto;
+            overflow-y: hidden;
+            width: 100%;
+            -webkit-overflow-scrolling: touch;
+        }
+        .table-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: var(--primary-color);
+            font-size: 1.05rem;
+            position: sticky;
+            right: 0;
+            display: inline-block;
+            z-index: 10;
+            background: white;
+            padding-left: 10px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: center;
+            font-size: 0.75rem;
+            min-width: 1000px;
+        }
+        th,
+        td {
+            border: 1px solid var(--border-color);
+            padding: 2px;
+            height: 26px;
+        }
+        th {
+            background-color: var(--header-bg);
+            font-weight: bold;
+        }
+        .plan-row th {
+            height: 38px;
+            vertical-align: middle;
+            background-color: var(--header-bg);
+        }
+        .row-header-cell {
+            background-color: var(--light-purple);
+            color: #1e293b;
+            font-weight: bold;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            width: 93px;
+            min-width: 93px;
+            max-width: 93px;
+            padding: 0 6px;
+            position: sticky;
+            right: 0;
+            z-index: 5;
+            box-shadow: -2px 0 5px rgba(0, 0, 0, 0.05);
+            border-left: 2px solid #4b5563 !important;
+        }
+        thead tr:first-child th:first-child,
+        thead tr:last-child th:first-child {
+            position: sticky;
+            right: 0;
+            z-index: 6;
+            background-color: var(--header-bg) !important;
+            color: #1e293b;
+            border-left: 2px solid #4b5563 !important;
+        }
+        .thick-left-border {
+            border-left: 2px solid #4b5563 !important;
+        }
+        .thick-top-border {
+            border-top: 2px solid #4b5563 !important;
+        }
+        .cell-white {
+            background-color: #ffffff !important;
+        }
+        .cell-soft-blue {
+            background-color: var(--soft-blue) !important;
+        }
+        .cell-soft-green {
+            background-color: var(--soft-green) !important;
+        }
+        input.cell-input {
+            width: 32px;
+            height: 100%;
+            border: 1px solid transparent;
+            background: transparent;
+            text-align: center;
+            font-size: 0.75rem;
+            outline: none;
+            caret-color: transparent;
+        }
+        input.cell-input:focus,
+        input.cell-input.cell-active {
+            background-color: #eff6ff !important;
+            border: 2px solid #f97316 !important;
+        }
+        .sub-plan-input {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: transparent;
+            text-align: center;
+            font-size: 0.75rem;
+            outline: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .sub-plan-input:focus {
+            background-color: #eff6ff;
+        }
+        .actions-bar {
+            display: flex;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            align-items: center;
+            gap: 10px;
+            margin-top: 15px;
+            margin-bottom: 25px;
+            padding-bottom: 5px;
+            -webkit-overflow-scrolling: touch;
+        }
+        .btn {
+            padding: 12px 20px;
+            font-size: 1rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            color: white;
+            transition: opacity 0.2s, background-color 0.1s, transform 0.1s;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .btn:hover {
+            opacity: 0.9;
+        }
+        .btn:active {
+            background-color: #facc15 !important;
+            color: #0f172a !important;
+            transform: scale(0.97);
+        }
+        .btn-danger {
+            background-color: #dc2626;
+        }
+        .btn-purple {
+            background-color: #7c3aed;
+        }
+        .btn-restore {
+            background-color: #0d9488;
+        }
+        .btn-table-r {
+            background-color: #2563eb;
+        }
+        .btn-table-l {
+            background-color: #db2777;
+        }
+        .btn-success {
+            background-color: #16a34a;
+        }
+        #custom-numeric-keyboard {
+            display: none;
+            position: fixed;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1e293b;
+            padding: 6px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+            z-index: 9999;
+            border-radius: 12px;
+            direction: ltr;
+            width: 96%;
+            max-width: 420px;
+        }
+        .kb-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 4px;
+            width: 100%;
+            margin: 0 auto;
+        }
+        .kb-btn {
+            background: #334155;
+            color: white;
+            border: none;
+            padding: 10px 0;
+            font-size: 1.25rem;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.1s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .kb-btn:active {
+            background: #475569;
+        }
+        .kb-btn-action {
+            background: #0284c7;
+        }
+        .kb-btn-nav {
+            background: #059669;
+        }
+        .kb-btn-special {
+            background: #dc2626;
+        }
+        @media (max-width: 600px) {
+            .header-row {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 6px;
+            }
+            .month-picker {
+                justify-content: center;
+            }
+        }
+        .save-indicator {
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #22c55e;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 30px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            z-index: 9998;
+            display: none;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s;
+        }
+        .save-indicator.show {
+            display: block;
+            animation: fadeInOut 1.5s ease-in-out;
+        }
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translateX(-50%) translateY(10px); }
+            15% { opacity: 1; transform: translateX(-50%) translateY(0); }
+            85% { opacity: 1; transform: translateX(-50%) translateY(0); }
+            100% { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+        }
+        /* استایل برای نمایش پیام خطا در اندروید */
+        .error-message {
+            position: fixed;
+            bottom: 120px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #dc2626;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-weight: bold;
+            z-index: 9999;
+            display: none;
+            max-width: 90%;
+            text-align: center;
+        }
+        .error-message.show {
+            display: block;
+            animation: fadeInOut 2s ease-in-out;
+        }
+    </style>
+</head>
+<body onbeforeunload="return handleBeforeUnload(event);">
+
+    <div class="header-row">
+        <h1>آمار قوس کاشی</h1>
+        <div class="month-picker">
+            <label>ماه:
+                <select id="monthSelect" onchange="updateMonthYear()">
+                    <option value="فروردین">فروردین</option>
+                    <option value="اردیبهشت">اردیبهشت</option>
+                    <option value="خرداد">خرداد</option>
+                    <option value="تیر">تیر</option>
+                    <option value="مرداد" selected>مرداد</option>
+                    <option value="شهریور">شهریور</option>
+                    <option value="مهر">مهر</option>
+                    <option value="آبان">آبان</option>
+                    <option value="آذر">آذر</option>
+                    <option value="دی">دی</option>
+                    <option value="بهمن">بهمن</option>
+                    <option value="اسفند">اسفند</option>
+                </select>
+            </label>
+            <label>سال:
+                <select id="yearSelect" onchange="updateMonthYear()">
+                    <!-- populated by js -->
+                </select>
+            </label>
+        </div>
+    </div>
+
+    <div id="saveIndicator" class="save-indicator">✓ ذخیره شد</div>
+    <div id="errorMessage" class="error-message"></div>
+
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('line1', event)"> خط ۱</button>
+        <button class="tab-btn" onclick="switchTab('line2', event)"> خط ۲</button>
+    </div>
+
+    <div id="line1" class="tab-content active">
+        <div style="background: white; padding: 10px;">
+            <div class="table-section" id="section-l1-r">
+                <div class="table-title">
+                    <span id="title-l1-r">قوس کاشی راست «R» کوره - (خط ۱)</span>
+                </div>
+                <div class="table-responsive">
+                    <table id="tbl-l1-r"></table>
+                </div>
+            </div>
+            <div class="table-section" id="section-l1-l">
+                <div class="table-title">
+                    <span id="title-l1-l">قوس کاشی چپ «L» کوره - (خط ۱)</span>
+                </div>
+                <div class="table-responsive">
+                    <table id="tbl-l1-l"></table>
+                </div>
+            </div>
+        </div>
+        <div class="actions-bar">
+            <button class="btn btn-danger" onclick="clearTableData('line1')">🗑️ پاک کردن</button>
+            <button class="btn btn-purple" onclick="backupJSON('line1', 'خط ۱')">📥 بک‌آپ </button>
+            <button class="btn btn-restore" onclick="restoreJSON('line1')">📤 بازیابی</button>
+            <input type="file" id="file-input-line1" style="display:none" accept=".json" onchange="handleFileRestore(event, 'line1')">
+            <button class="btn btn-table-r" onclick="captureSingleTable('section-l1-r', 'قوس_کاشی_راست_خط_۱')">📷 جدول R</button>
+            <button class="btn btn-table-l" onclick="captureSingleTable('section-l1-l', 'قوس_کاشی_چپ_خط_۱')">📷 جدول L</button>
+            <button class="btn btn-success" onclick="captureTab('line1', 'خط ۱')">📷 اسکرین شات</button>
+        </div>
+    </div>
+
+    <div id="line2" class="tab-content">
+        <div style="background: white; padding: 10px;">
+            <div class="table-section" id="section-l2-r">
+                <div class="table-title">
+                    <span id="title-l2-r">قوس کاشی راست «R» کوره - (خط ۲)</span>
+                </div>
+                <div class="table-responsive">
+                    <table id="tbl-l2-r"></table>
+                </div>
+            </div>
+            <div class="table-section" id="section-l2-l">
+                <div class="table-title">
+                    <span id="title-l2-l">قوس کاشی چپ «L» کوره - (خط ۲)</span>
+                </div>
+                <div class="table-responsive">
+                    <table id="tbl-l2-l"></table>
+                </div>
+            </div>
+        </div>
+        <div class="actions-bar">
+            <button class="btn btn-danger" onclick="clearTableData('line2')">🗑️ پاک کردن</button>
+            <button class="btn btn-purple" onclick="backupJSON('line2', 'خط ۲')">📥 بک‌آپ JSON</button>
+            <button class="btn btn-restore" onclick="restoreJSON('line2')">📤 بازیابی</button>
+            <input type="file" id="file-input-line2" style="display:none" accept=".json" onchange="handleFileRestore(event, 'line2')">
+            <button class="btn btn-table-r" onclick="captureSingleTable('section-l2-r', 'قوس_کاشی_راست_خط_۲')">📷 جدول R</button>
+            <button class="btn btn-table-l" onclick="captureSingleTable('section-l2-l', 'قوس_کاشی_چپ_خط_۲')">📷 جدول L</button>
+            <button class="btn btn-success" onclick="captureTab('line2', 'خط ۲')">📷 اسکرین شات</button>
+        </div>
+    </div>
+
+    <div id="custom-numeric-keyboard">
+        <div class="kb-grid">
+            <button class="kb-btn" onclick="kbInsertDigit('7')">7</button>
+            <button class="kb-btn" onclick="kbInsertDigit('8')">8</button>
+            <button class="kb-btn" onclick="kbInsertDigit('9')">9</button>
+            <button class="kb-btn kb-btn-special" onclick="kbCloseKeyboard()">بستن</button>
+            <button class="kb-btn" onclick="kbInsertDigit('4')">4</button>
+            <button class="kb-btn" onclick="kbInsertDigit('5')">5</button>
+            <button class="kb-btn" onclick="kbInsertDigit('6')">6</button>
+            <button class="kb-btn kb-btn-action" onclick="kbDeleteDigit()">⌫</button>
+            <button class="kb-btn" onclick="kbInsertDigit('1')">1</button>
+            <button class="kb-btn" onclick="kbInsertDigit('2')">2</button>
+            <button class="kb-btn" onclick="kbInsertDigit('3')">3</button>
+            <button class="kb-btn kb-btn-nav" onclick="kbMoveRow(-1)">⬆ بالا</button>
+            <button class="kb-btn" onclick="kbInsertDigit('0')">0</button>
+            <button class="kb-btn kb-btn-action" onclick="kbMoveHorizontal(1)">بعدی⬅ </button>
+            <button class="kb-btn kb-btn-action" onclick="kbMoveHorizontal(-1)">➡ قبلی</button>
+            <button class="kb-btn kb-btn-nav" onclick="kbMoveRow(1)">⬇ پایین</button>
+        </div>
+    </div>
+
+    <script>
+        const daysInMonth = 31;
+        const subCols = ['8H', '24H', 'هفتگی'];
+        const rowNames = [
+            "ایستا C", "ایستا V", "لبه آ C", "لبه آ V",
+            "لبه ب C", "لبه ب V", "پیچ و تاب", "پیوستگی",
+            "گوشه بالا", "گوشه پایین", "درجه"
+        ];
+
+        let hasUnsavedChanges = false;
+        let activeCellInput = null;
+        let currentMonth = 'مرداد';
+        let currentYear = '۱۴۰۵';
+        let saveTimeout = null;
+
+        function toPersianDigits(num) {
+            const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+            return String(num).split('').map(d => persianDigits[parseInt(d)]).join('');
+        }
+
+        function populateYearSelect() {
+            const sel = document.getElementById('yearSelect');
+            sel.innerHTML = '';
+            const start = 1400;
+            const end = 1410;
+            for (let y = start; y <= end; y++) {
+                const opt = document.createElement('option');
+                opt.value = String(y);
+                opt.textContent = toPersianDigits(y);
+                if (y === 1405) opt.selected = true;
+                sel.appendChild(opt);
+            }
+            currentYear = sel.options[sel.selectedIndex].value;
+        }
+
+        function updateAllTitles() {
+            const m = document.getElementById('monthSelect').value;
+            const y = document.getElementById('yearSelect').value;
+            currentMonth = m;
+            currentYear = y;
+            const persianYear = toPersianDigits(parseInt(y));
+            const titleSpans = document.querySelectorAll('.table-title span');
+            titleSpans.forEach(span => {
+                let text = span.innerText;
+                const regex = / - ([\u0600-\u06FF]+)\s+(\d+)\s*\(خط/;
+                const match = text.match(regex);
+                if (match) {
+                    const newText = text.replace(regex, ` - ${currentMonth} ${persianYear} (خط`);
+                    span.innerText = newText;
+                } else {
+                    const fallbackRegex = /(\d+)\s*\(خط/;
+                    const fallbackMatch = text.match(fallbackRegex);
+                    if (fallbackMatch) {
+                        const newText = text.replace(fallbackRegex, `${persianYear} (خط`);
+                        span.innerText = newText;
+                    } else {
+                        const isRight = text.includes('راست');
+                        const base = isRight ? 'قوس کاشی راست «R» کوره' : 'قوس کاشی چپ «L» کوره';
+                        const linePart = text.includes('خط ۱') ? '(خط ۱)' : '(خط ۲)';
+                        span.innerText = `${base} - ${currentMonth} ${persianYear} ${linePart}`;
+                    }
+                }
+            });
+            localStorage.setItem('qows_month_year', JSON.stringify({ month: currentMonth, year: currentYear }));
+            autoSaveInstant();
+        }
+
+        function updateMonthYear() {
+            updateAllTitles();
+        }
+
+        function loadMonthYearFromStorage() {
+            const stored = localStorage.getItem('qows_month_year');
+            if (stored) {
+                try {
+                    const obj = JSON.parse(stored);
+                    if (obj.month) {
+                        document.getElementById('monthSelect').value = obj.month;
+                        currentMonth = obj.month;
+                    }
+                    if (obj.year) {
+                        const sel = document.getElementById('yearSelect');
+                        for (let i = 0; i < sel.options.length; i++) {
+                            if (sel.options[i].value === obj.year) {
+                                sel.selectedIndex = i;
+                                break;
+                            }
+                        }
+                        currentYear = obj.year;
+                    }
+                } catch (e) {}
+            }
+            updateAllTitles();
+        }
+
+        function showSaveIndicator() {
+            const indicator = document.getElementById('saveIndicator');
+            indicator.classList.remove('show');
+            void indicator.offsetWidth;
+            indicator.classList.add('show');
+            setTimeout(() => {
+                indicator.classList.remove('show');
+            }, 1500);
+        }
+
+        function showErrorMessage(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.classList.remove('show');
+            void errorDiv.offsetWidth;
+            errorDiv.classList.add('show');
+            setTimeout(() => {
+                errorDiv.classList.remove('show');
+            }, 3000);
+        }
+
+        function autoSaveInstant() {
+            if (saveTimeout) {
+                clearTimeout(saveTimeout);
+            }
+            saveTimeout = setTimeout(() => {
+                try {
+                    let data = gatherAllData();
+                    data.monthYear = { month: currentMonth, year: currentYear };
+                    localStorage.setItem('tamin_tash_qows_full_data', JSON.stringify(data));
+                    hasUnsavedChanges = false;
+                    showSaveIndicator();
+                    console.log('✅ داده‌ها با موفقیت ذخیره شدند');
+                } catch (e) {
+                    console.error('❌ خطا در ذخیره‌سازی:', e);
+                }
+                saveTimeout = null;
+            }, 100);
+        }
+
+        function createTableHTML(tableIdPrefix) {
+            let table = document.getElementById(tableIdPrefix);
+            if (!table) return;
+            let html = '';
+            html += '<thead><tr>';
+            html += '<th rowspan="2" class="row-header-cell">ایام</th>';
+            for (let d = 1; d <= daysInMonth; d++) {
+                let borderClass = (d < daysInMonth) ? 'thick-left-border' : '';
+                html += `<th colspan="3" class="${borderClass}">${d}</th>`;
+            }
+            html += '</tr>';
+            html += '<tr class="plan-row">';
+            for (let d = 1; d <= daysInMonth; d++) {
+                let borderClass = (d < daysInMonth) ? 'thick-left-border' : '';
+                html += `<th colspan="3" class="${borderClass}" style="padding: 0;"><input type="text" class="sub-plan-input" data-plan-day="${d}" placeholder="نام طرح" oninput="handlePlanInput(this)" onkeydown="handlePlanEnterKey(event, this)"></th>`;
+            }
+            html += '</tr>';
+            html += '<tr>';
+            html += '<th class="row-header-cell">زمان</th>';
+            for (let d = 1; d <= daysInMonth; d++) {
+                subCols.forEach((sc, scIdx) => {
+                    let borderClass = (scIdx === subCols.length - 1) ? 'thick-left-border' : '';
+                    html += `<th class="${borderClass}">${sc}</th>`;
+                });
+            }
+            html += '</tr></thead>';
+            html += '<tbody>';
+            rowNames.forEach((rName, rIndex) => {
+                let isGradeRow = (rName === "درجه");
+                let isEvenRow = (rIndex % 2 === 0);
+                let isFirstDataRow = (rIndex === 0);
+                let topBorderClass = isFirstDataRow ? 'thick-top-border' : '';
+                html += `<tr>`;
+                html += `<td class="row-header-cell ${topBorderClass}">${rName}</td>`;
+                for (let d = 1; d <= daysInMonth; d++) {
+                    subCols.forEach((sc, scIndex) => {
+                        let borderClass = (scIndex === subCols.length - 1) ? 'thick-left-border' : '';
+                        let cellColorClass = '';
+                        if (!isGradeRow) {
+                            cellColorClass = isEvenRow ? 'cell-soft-blue' : 'cell-white';
+                        } else {
+                            cellColorClass = 'cell-soft-green';
+                        }
+                        html += `<td class="${borderClass} ${topBorderClass} ${cellColorClass}"><input type="text" inputmode="none" class="cell-input" data-day="${d}" data-subcol="${scIndex}" data-row="${rIndex}" oninput="handleCellInput(this)" onclick="openCustomKeyboard(this)" onkeydown="handleCellEnterKey(event, this)"></td>`;
+                    });
+                }
+                html += '</tr>';
+            });
+            html += '</tbody>';
+            table.innerHTML = html;
+        }
+
+        function handleCellInput(inputElement) {
+            autoSaveInstant();
+        }
+
+        function handlePlanInput(inputElement) {
+            autoSaveInstant();
+        }
+
+        function openCustomKeyboard(inputElement) {
+            document.querySelectorAll('input.cell-input').forEach(el => el.classList.remove('cell-active'));
+            activeCellInput = inputElement;
+            activeCellInput.classList.add('cell-active');
+            activeCellInput.focus();
+            activeCellInput.select();
+            document.getElementById('custom-numeric-keyboard').style.display = 'block';
+        }
+
+        function kbCloseKeyboard() {
+            document.getElementById('custom-numeric-keyboard').style.display = 'none';
+            if (activeCellInput) {
+                activeCellInput.classList.remove('cell-active');
+                activeCellInput.blur();
+                activeCellInput = null;
+            }
+        }
+
+        function kbInsertDigit(digit) {
+            if (!activeCellInput) return;
+            let val = activeCellInput.value;
+            if (val.length < 2) {
+                activeCellInput.value = val + digit;
+                activeCellInput.dispatchEvent(new Event('input', { bubbles: true }));
+                autoSaveInstant();
+            }
+        }
+
+        function kbDeleteDigit() {
+            if (!activeCellInput) return;
+            let val = activeCellInput.value;
+            if (val.length > 0) {
+                activeCellInput.value = val.slice(0, -1);
+                activeCellInput.dispatchEvent(new Event('input', { bubbles: true }));
+                autoSaveInstant();
+            }
+        }
+
+        function kbMoveRow(direction) {
+            if (!activeCellInput) return;
+            let currentRow = activeCellInput.closest('tr');
+            let targetRow = direction === 1 ? currentRow.nextElementSibling : currentRow.previousElementSibling;
+            if (targetRow) {
+                let targetInput = targetRow.querySelector(
+                    `input.cell-input[data-day="${activeCellInput.dataset.day}"][data-subcol="${activeCellInput.dataset.subcol}"]`
+                );
+                if (targetInput) {
+                    openCustomKeyboard(targetInput);
+                    targetInput.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+                }
+            }
+        }
+
+        function kbMoveHorizontal(direction) {
+            if (!activeCellInput) return;
+            let table = activeCellInput.closest('table');
+            let allInputs = Array.from(table.querySelectorAll('input.cell-input'));
+            let currentIndex = allInputs.indexOf(activeCellInput);
+            let targetIndex = currentIndex + direction;
+            if (targetIndex >= 0 && targetIndex < allInputs.length) {
+                let targetInput = allInputs[targetIndex];
+                openCustomKeyboard(targetInput);
+                targetInput.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+            }
+        }
+
+        function handleCellEnterKey(event, currentInput) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                openCustomKeyboard(currentInput);
+            }
+        }
+
+        function handlePlanEnterKey(event, currentInput) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                let table = currentInput.closest('table');
+                let firstRowBody = table.querySelector('tbody tr');
+                if (firstRowBody) {
+                    let targetInput = firstRowBody.querySelector(
+                        `input.cell-input[data-day="${currentInput.dataset.planDay}"][data-subcol="0"]`);
+                    if (targetInput) {
+                        openCustomKeyboard(targetInput);
+                    }
+                }
+            }
+        }
+
+        function initTables() {
+            createTableHTML('tbl-l1-r');
+            createTableHTML('tbl-l1-l');
+            createTableHTML('tbl-l2-r');
+            createTableHTML('tbl-l2-l');
+            populateYearSelect();
+            loadMonthYearFromStorage();
+            loadDataFromStorage();
+            hasUnsavedChanges = false;
+        }
+
+        function switchTab(tabId, evt) {
+            kbCloseKeyboard();
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            evt.currentTarget.classList.add('active');
+        }
+
+        function gatherAllData() {
+            return {
+                line1: {
+                    r: { plans: getPlanValues('tbl-l1-r'), cells: getTableValues('tbl-l1-r') },
+                    l: { plans: getPlanValues('tbl-l1-l'), cells: getTableValues('tbl-l1-l') }
+                },
+                line2: {
+                    r: { plans: getPlanValues('tbl-l2-r'), cells: getTableValues('tbl-l2-r') },
+                    l: { plans: getPlanValues('tbl-l2-l'), cells: getTableValues('tbl-l2-l') }
+                },
+                monthYear: { month: currentMonth, year: currentYear }
+            };
+        }
+
+        function getPlanValues(tableId) {
+            let table = document.getElementById(tableId);
+            if (!table) return {};
+            let inputs = table.querySelectorAll('input.sub-plan-input');
+            let values = {};
+            inputs.forEach(input => {
+                values[input.dataset.planDay] = input.value;
+            });
+            return values;
+        }
+
+        function getTableValues(tableId) {
+            let table = document.getElementById(tableId);
+            if (!table) return {};
+            let inputs = table.querySelectorAll('input.cell-input');
+            let values = {};
+            inputs.forEach(input => {
+                let key = `${input.dataset.row}_${input.dataset.day}_${input.dataset.subcol}`;
+                values[key] = input.value;
+            });
+            return values;
+        }
+
+        function loadDataFromStorage() {
+            let saved = localStorage.getItem('tamin_tash_qows_full_data');
+            if (!saved) {
+                console.log('ℹ️ داده‌ای در localStorage پیدا نشد');
+                return;
+            }
+            try {
+                let data = JSON.parse(saved);
+                console.log('📂 داده‌ها از localStorage بارگذاری شدند');
+                if (data.monthYear) {
+                    if (data.monthYear.month) {
+                        document.getElementById('monthSelect').value = data.monthYear.month;
+                        currentMonth = data.monthYear.month;
+                    }
+                    if (data.monthYear.year) {
+                        const sel = document.getElementById('yearSelect');
+                        for (let i = 0; i < sel.options.length; i++) {
+                            if (sel.options[i].value === data.monthYear.year) {
+                                sel.selectedIndex = i;
+                                break;
+                            }
+                        }
+                        currentYear = data.monthYear.year;
+                    }
+                    updateAllTitles();
+                }
+                applyDataToDOM(data);
+            } catch (e) {
+                console.error("❌ Error loading data", e);
+            }
+        }
+
+        function applyDataToDOM(data) {
+            if (data.line1) {
+                if (data.line1.r) {
+                    setPlanValues('tbl-l1-r', data.line1.r.plans);
+                    setTableValues('tbl-l1-r', data.line1.r.cells);
+                }
+                if (data.line1.l) {
+                    setPlanValues('tbl-l1-l', data.line1.l.plans);
+                    setTableValues('tbl-l1-l', data.line1.l.cells);
+                }
+            }
+            if (data.line2) {
+                if (data.line2.r) {
+                    setPlanValues('tbl-l2-r', data.line2.r.plans);
+                    setTableValues('tbl-l2-r', data.line2.r.cells);
+                }
+                if (data.line2.l) {
+                    setPlanValues('tbl-l2-l', data.line2.l.plans);
+                    setTableValues('tbl-l2-l', data.line2.l.cells);
+                }
+            }
+        }
+
+        function setPlanValues(tableId, plansData) {
+            if (!plansData) return;
+            let table = document.getElementById(tableId);
+            if (!table) return;
+            let inputs = table.querySelectorAll('input.sub-plan-input');
+            inputs.forEach(input => {
+                if (plansData[input.dataset.planDay] !== undefined) {
+                    input.value = plansData[input.dataset.planDay];
+                }
+            });
+        }
+
+        function setTableValues(tableId, cellsData) {
+            if (!cellsData) return;
+            let table = document.getElementById(tableId);
+            if (!table) return;
+            let inputs = table.querySelectorAll('input.cell-input');
+            inputs.forEach(input => {
+                let key = `${input.dataset.row}_${input.dataset.day}_${input.dataset.subcol}`;
+                if (cellsData[key] !== undefined) {
+                    input.value = cellsData[key];
+                }
+            });
+        }
+
+        function handleBeforeUnload(e) {
+            if (hasUnsavedChanges) {
+                e.preventDefault();
+                e.returnValue = 'تغییرات ذخیره‌نشده‌ای دارید. آیا مطمئنید می‌خواهید خارج شوید؟';
+                return e.returnValue;
+            }
+        }
+
+        function getPersianDayAndMonthName() {
+            const options = { day: 'numeric', month: 'long', calendar: 'persian' };
+            let formatter = new Intl.DateTimeFormat('fa-IR', options);
+            let parts = formatter.formatToParts(new Date());
+            let day = parts.find(p => p.type === 'day')?.value || '20';
+            let month = parts.find(p => p.type === 'month')?.value || 'مرداد';
+            return `${day}${month}`;
+        }
+
+        // ============= توابع اصلاح شده برای خروجی عکس =============
+
+        function downloadImage(canvas, fileName) {
+            try {
+                // تبدیل به PNG با کیفیت بالا
+                const imageData = canvas.toDataURL('image/png', 1.0);
+                
+                // روش اول: استفاده از anchor tag (در اکثر مرورگرها و WebView کار می‌کند)
+                const link = document.createElement('a');
+                link.download = fileName + '.png';
+                link.href = imageData;
+                link.click();
+                
+                // روش دوم: برای اندروید WebView (اگر روش اول کار نکرد)
+                setTimeout(() => {
+                    // اگر لینک دانلود نشد، از روش جایگزین استفاده کن
+                    try {
+                        const win = window.open('', '_blank');
+                        if (win) {
+                            win.document.write('<img src="' + imageData + '" alt="تصویر" />');
+                            win.document.title = fileName;
+                            win.focus();
+                            win.print();
+                        }
+                    } catch (e) {
+                        console.log('روش جایگزین دانلود ناموفق بود');
+                    }
+                }, 100);
+                
+            } catch (error) {
+                console.error('خطا در دانلود:', error);
+                showErrorMessage('خطا در دانلود تصویر. لطفاً دوباره تلاش کنید.');
+            }
+        }
+
+        function captureTab(lineKey, lineName) {
+            kbCloseKeyboard();
+            const captureElement = document.getElementById(lineKey === 'line1' ? 'line1' : 'line2');
+            const contentDiv = captureElement.querySelector('div[style*="background: white"]');
+            
+            if (!contentDiv) {
+                showErrorMessage('عنصر مورد نظر برای عکس‌برداری پیدا نشد!');
+                return;
+            }
+
+            // نمایش پیام در حال پردازش
+            showErrorMessage('در حال آماده‌سازی تصویر...');
+
+            html2canvas(contentDiv, {
+                scale: 3, // کیفیت بسیار بالا
+                useCORS: true,
+                allowTaint: true,
+                backgroundColor: '#ffffff',
+                logging: false,
+                width: contentDiv.scrollWidth,
+                height: contentDiv.scrollHeight,
+                windowWidth: contentDiv.scrollWidth,
+                windowHeight: contentDiv.scrollHeight,
+                onclone: function(document) {
+                    // اطمینان از نمایش کامل همه عناصر
+                }
+            }).then(canvas => {
+                const fileName = `آمار_قوس_کاشی_${lineName}_${currentMonth}_${currentYear}`;
+                downloadImage(canvas, fileName);
+                showErrorMessage('✅ تصویر با موفقیت ذخیره شد!');
+            }).catch(err => {
+                console.error('خطا در گرفتن عکس:', err);
+                showErrorMessage('❌ خطا در گرفتن عکس. لطفاً دوباره تلاش کنید.');
+            });
+        }
+
+        function captureSingleTable(sectionId, fileName) {
+            kbCloseKeyboard();
+            const captureElement = document.getElementById(sectionId);
+            
+            if (!captureElement) {
+                showErrorMessage('عنصر مورد نظر برای عکس‌برداری پیدا نشد!');
+                return;
+            }
+
+            const responsiveDiv = captureElement.querySelector('.table-responsive');
+            const tableElement = captureElement.querySelector('table');
+            
+            // ذخیره تنظیمات قبلی
+            const oldOverflow = responsiveDiv ? responsiveDiv.style.overflowX : '';
+            const oldMaxWidth = responsiveDiv ? responsiveDiv.style.maxWidth : '';
+            const oldTableWidth = tableElement ? tableElement.style.width : '';
+            const oldMinWidth = tableElement ? tableElement.style.minWidth : '';
+            
+            // تنظیم برای عکس‌برداری کامل
+            if (responsiveDiv) {
+                responsiveDiv.style.overflowX = 'visible';
+                responsiveDiv.style.maxWidth = 'none';
+                responsiveDiv.style.width = 'auto';
+            }
+            if (tableElement) {
+                tableElement.style.width = 'max-content';
+                tableElement.style.minWidth = '100%';
+            }
+
+            // نمایش پیام در حال پردازش
+            showErrorMessage('در حال آماده‌سازی تصویر جدول...');
+
+            const totalWidth = tableElement ? Math.max(tableElement.scrollWidth + 100, captureElement.scrollWidth + 100) : captureElement.scrollWidth + 100;
+            
+            html2canvas(captureElement, {
+                scale: 3, // کیفیت بالا
+                useCORS: true,
+                allowTaint: true,
+                backgroundColor: '#ffffff',
+                logging: false,
+                width: totalWidth,
+                height: captureElement.scrollHeight + 50,
+                windowWidth: totalWidth,
+                windowHeight: captureElement.scrollHeight + 50
+            }).then(canvas => {
+                // بازگرداندن تنظیمات
+                if (responsiveDiv) {
+                    responsiveDiv.style.overflowX = oldOverflow;
+                    responsiveDiv.style.maxWidth = oldMaxWidth;
+                    responsiveDiv.style.width = '';
+                }
+                if (tableElement) {
+                    tableElement.style.width = oldTableWidth;
+                    tableElement.style.minWidth = oldMinWidth;
+                }
+                
+                const fullFileName = `${fileName}_${currentMonth}_${currentYear}`;
+                downloadImage(canvas, fullFileName);
+                showErrorMessage('✅ تصویر جدول با موفقیت ذخیره شد!');
+            }).catch(err => {
+                // بازگرداندن تنظیمات در صورت خطا
+                if (responsiveDiv) {
+                    responsiveDiv.style.overflowX = oldOverflow;
+                    responsiveDiv.style.maxWidth = oldMaxWidth;
+                    responsiveDiv.style.width = '';
+                }
+                if (tableElement) {
+                    tableElement.style.width = oldTableWidth;
+                    tableElement.style.minWidth = oldMinWidth;
+                }
+                console.error('خطا در گرفتن عکس از جدول:', err);
+                showErrorMessage('❌ خطا در گرفتن عکس از جدول. لطفاً دوباره تلاش کنید.');
+            });
+        }
+
+        // ============= ادامه توابع قبلی =============
+
+        async function backupJSON(lineKey, lineNameText) {
+            kbCloseKeyboard();
+            let lineData = {};
+            if (lineKey === 'line1') {
+                lineData = {
+                    r: { plans: getPlanValues('tbl-l1-r'), cells: getTableValues('tbl-l1-r') },
+                    l: { plans: getPlanValues('tbl-l1-l'), cells: getTableValues('tbl-l1-l') }
+                };
+            } else {
+                lineData = {
+                    r: { plans: getPlanValues('tbl-l2-r'), cells: getTableValues('tbl-l2-r') },
+                    l: { plans: getPlanValues('tbl-l2-l'), cells: getTableValues('tbl-l2-l') }
+                };
+            }
+            let fullBackup = {
+                ...lineData,
+                monthYear: { month: currentMonth, year: currentYear }
+            };
+            let datePrefix = getPersianDayAndMonthName();
+            let defaultFileName = `${datePrefix} قوس کاشی ${lineNameText}.json`;
+            let jsonStr = JSON.stringify(fullBackup, null, 2);
+            
+            // تلاش برای ذخیره با Directory API (اندروید)
+            try {
+                if (window.showDirectoryPicker) {
+                    let dirHandle = await window.showDirectoryPicker();
+                    let userFileName = prompt("نام فایل پشتیبان:", defaultFileName);
+                    if (userFileName === null) return;
+                    if (!userFileName.endsWith('.json')) userFileName += '.json';
+                    let fileHandle = await dirHandle.getFileHandle(userFileName, { create: true });
+                    let writable = await fileHandle.createWritable();
+                    await writable.write(jsonStr);
+                    await writable.close();
+                    alert(`✅ فایل پشتیبان با موفقیت ذخیره شد.`);
+                    return;
+                }
+            } catch (err) {
+                if (err.name !== 'AbortError') console.warn("Directory Picker failed", err);
+            }
+            
+            // روش جایگزین: دانلود معمولی
+            let userFileNameFallback = prompt("نام فایل پشتیبان:", defaultFileName);
+            if (userFileNameFallback === null) return;
+            let blob = new Blob([jsonStr], { type: 'application/json' });
+            let url = URL.createObjectURL(blob);
+            let link = document.createElement('a');
+            link.href = url;
+            link.download = userFileNameFallback.endsWith('.json') ? userFileNameFallback : userFileNameFallback + '.json';
+            link.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function restoreJSON(lineKey) {
+            kbCloseKeyboard();
+            if (confirm("هشدار: با بارگذاری فایل جدید، ممکن است اطلاعات فعلی بازنویسی شوند. آیا می‌خواهید فایل JSON مورد نظر را انتخاب کنید?")) {
+                document.getElementById(`file-input-${lineKey}`).click();
+            }
+        }
+
+        function handleFileRestore(event, lineKey) {
+            let file = event.target.files[0];
+            if (!file) return;
+            let reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    let importedData = JSON.parse(e.target.result);
+                    let fullData = gatherAllData();
+                    if (lineKey === 'line1') {
+                        fullData.line1 = importedData;
+                    } else {
+                        fullData.line2 = importedData;
+                    }
+                    if (importedData.monthYear) {
+                        fullData.monthYear = importedData.monthYear;
+                    }
+                    applyDataToDOM(fullData);
+                    localStorage.setItem('tamin_tash_qows_full_data', JSON.stringify(fullData));
+                    hasUnsavedChanges = false;
+                    alert("✅ اطلاعات با موفقیت از فایل JSON بازیابی شد.");
+                    if (fullData.monthYear) {
+                        if (fullData.monthYear.month) {
+                            document.getElementById('monthSelect').value = fullData.monthYear.month;
+                            currentMonth = fullData.monthYear.month;
+                        }
+                        if (fullData.monthYear.year) {
+                            const sel = document.getElementById('yearSelect');
+                            for (let i = 0; i < sel.options.length; i++) {
+                                if (sel.options[i].value === fullData.monthYear.year) {
+                                    sel.selectedIndex = i;
+                                    break;
+                                }
+                            }
+                            currentYear = fullData.monthYear.year;
+                        }
+                        updateAllTitles();
+                    }
+                } catch (err) {
+                    alert("❌ خطا در خواندن فایل JSON. فایل انتخاب شده معتبر نیست.");
+                    console.error(err);
+                }
+                event.target.value = {};
+            };
+            reader.readAsText(file);
+        }
+
+        function clearTableData(lineKey) {
+            kbCloseKeyboard();
+            let lineName = (lineKey === 'line1') ? 'خط ۱' : 'خط ۲';
+            if (confirm(`آیا مطمئن هستید که می‌خواهید اطلاعات ${lineName} را پاک کنید؟`)) {
+                if (lineKey === 'line1') {
+                    clearTableInputs('tbl-l1-r');
+                    clearTableInputs('tbl-l1-l');
+                } else {
+                    clearTableInputs('tbl-l2-r');
+                    clearTableInputs('tbl-l2-l');
+                }
+                autoSaveInstant();
+                alert(`✅ اطلاعات ${lineName} پاک شد.`);
+            }
+        }
+
+        function clearTableInputs(tableId) {
+            let table = document.getElementById(tableId);
+            if (!table) return;
+            table.querySelectorAll('input.cell-input, input.sub-plan-input').forEach(input => input.value = '');
+        }
+
+        window.onload = function() {
+            initTables();
+            console.log('🚀 برنامه بارگذاری شد. ذخیره‌سازی آنی فعال است.');
+            console.log('📸 برای خروجی عکس با کیفیت بالا، از دکمه‌های اسکرین شات استفاده کنید.');
+        };
+    </script>
+</body>
+</html>
